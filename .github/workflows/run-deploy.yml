@@ -1,0 +1,58 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to (test/prod)'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - prod
+
+env:
+  PROJECT_ID: solderland
+  IMAGE_NAME: isanore-store
+  REGION: europe-west1
+  SERVICE_ACCOUNT: meteora-worker@solderland.iam.gserviceaccount.com
+
+jobs:
+  deploy:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'test' }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Configure Docker for GCP
+      run: gcloud auth configure-docker --quiet
+
+    - name: Create env file
+      run: |
+        if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+          echo "${{ secrets.ENV_PROD }}" > .docker/.env.prod
+        else
+          echo "${{ secrets.ENV_TEST }}" > .docker/.env.test
+        fi
+
+    - name: Deploy to Cloud Run
+      run: |
+        chmod +x .docker/deploy.sh
+        .docker/deploy.sh ${{ github.event.inputs.environment || 'test' }}
+
+    - name: Clean up
+      if: always()
+      run: |
+        rm -f .docker/.env.* || true 
