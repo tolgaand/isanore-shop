@@ -14,15 +14,13 @@ RUN yarn install --frozen-lockfile
 # Copy the rest of the application
 COPY . .
 
-# Copy environment file
-ARG ENV_FILE
-COPY ${ENV_FILE} .env
-
 # Build the application
 RUN yarn build
 
-# Copy env to server directory (after build creates the directory)
-RUN cat .env > .medusa/server/.env
+# Copy environment files
+ARG ENV_FILE
+COPY ${ENV_FILE} .env
+COPY ${ENV_FILE} .medusa/server/.env
 
 # Switch to medusa server directory
 WORKDIR /app/.medusa/server
