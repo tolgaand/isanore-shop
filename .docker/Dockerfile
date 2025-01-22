@@ -17,7 +17,7 @@ COPY . .
 # Copy environment file and prepare for server
 ARG ENV_FILE
 COPY ${ENV_FILE} .env
-RUN cp .env .medusa/server/.env
+RUN cat .env > .medusa/server/.env
 
 # Build the application
 RUN yarn build
