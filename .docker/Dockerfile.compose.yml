@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: .docker/Dockerfile
+    image: ${IMAGE_NAME:-gcr.io/solderland/isanore-store}:${ENV:-test}
+    container_name: isanore-store-${ENV:-test}
+    environment:
+      # Database Configuration
+      DATABASE_TYPE: ${DATABASE_TYPE}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+
+      # Medusa Configuration
+      STORE_CORS: ${STORE_CORS}
+      ADMIN_CORS: ${ADMIN_CORS}
+      JWT_SECRET: ${JWT_SECRET}
+      COOKIE_SECRET: ${COOKIE_SECRET}
+      NODE_ENV: ${NODE_ENV}
+
+      # Admin Configuration
+      MEDUSA_ADMIN_ONBOARDING_TYPE: ${MEDUSA_ADMIN_ONBOARDING_TYPE}
+      MEDUSA_ADMIN_BACKEND_URL: ${MEDUSA_ADMIN_BACKEND_URL}
+
+      # Port Configuration
+      PORT: "9000"
+    ports:
+      - "9000:9000" 

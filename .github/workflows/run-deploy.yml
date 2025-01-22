@@ -18,7 +18,6 @@ env:
   PROJECT_ID: solderland
   IMAGE_NAME: isanore-store
   REGION: europe-west1
-  SERVICE_ACCOUNT: meteora-worker@solderland.iam.gserviceaccount.com
 
 jobs:
   deploy:
@@ -30,11 +29,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Cloud SDK
+    - name: Set up Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ env.PROJECT_ID }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Authenticate to Google Cloud using JSON from secret
+      run: |
+        echo "${{ secrets.GCS_CD_SERVICE_ACCOUNT }}" | base64 --decode > $HOME/gcloud-key.json
+        gcloud auth activate-service-account --key-file=$HOME/gcloud-key.json
+        gcloud config set project ${{ env.PROJECT_ID }}
 
     - name: Configure Docker for GCP
       run: gcloud auth configure-docker --quiet
@@ -55,4 +57,5 @@ jobs:
     - name: Clean up
       if: always()
       run: |
-        rm -f .docker/.env.* || true 
+        rm -f .docker/.env.* || true
+        rm -f $HOME/gcloud-key.json || true 

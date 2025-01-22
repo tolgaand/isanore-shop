@@ -16,12 +16,12 @@ fi
 
 # GCP Configuration
 PROJECT_ID=${PROJECT_ID:-solderland}
-IMAGE_NAME=${IMAGE_NAME:-isanore-store}
+IMAGE_NAME=gcr.io/$PROJECT_ID/isanore-store
 REGION=${REGION:-europe-west1}
-SERVICE_ACCOUNT=${SERVICE_ACCOUNT:-meteora-worker@solderland.iam.gserviceaccount.com}
 
-# Get script directory
+# Get script directory and root directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
 
 # Environment specific configurations
 if [ "$1" == "prod" ]; then
@@ -36,23 +36,24 @@ else
     exit 1
 fi
 
-# Set full image name for GCR
-FULL_IMAGE_NAME="gcr.io/$PROJECT_ID/$IMAGE_NAME:$ENV"
+# Export variables for docker-compose
+export IMAGE_NAME
 
-echo "Building and pushing to Google Cloud..."
-if ! gcloud builds submit --tag $FULL_IMAGE_NAME; then
-    echo "Error: Cloud Build failed"
-    exit 1
-fi
+# Build phase
+echo "Building for $ENV environment..."
+docker compose --file "$SCRIPT_DIR/Dockerfile.compose.yml" --env-file "$SCRIPT_DIR/.env.$ENV" config
+docker compose --file "$SCRIPT_DIR/Dockerfile.compose.yml" --env-file "$SCRIPT_DIR/.env.$ENV" build
+
+# Push phase
+echo "Pushing to Google Container Registry..."
+docker compose --file "$SCRIPT_DIR/Dockerfile.compose.yml" --env-file "$SCRIPT_DIR/.env.$ENV" push
 
 echo "Deploying to Google Cloud Run..."
 if ! gcloud run deploy $INSTANCE_NAME \
-    --image $FULL_IMAGE_NAME \
+    --image $IMAGE_NAME:$ENV \
     --platform managed \
     --region $REGION \
     --project $PROJECT_ID \
-    --service-account $SERVICE_ACCOUNT \
-    --env-vars-file "$SCRIPT_DIR/.env.$ENV" \
     --quiet; then
     echo "Error: Deployment to Cloud Run failed"
     exit 1
