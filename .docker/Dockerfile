@@ -21,10 +21,17 @@ COPY . .
 # Build the application
 RUN yarn build
 
-# Expose the port the app runs on
-ARG PORT=9000
-ENV PORT=$PORT
-EXPOSE $PORT
+# Copy env to medusa server directory
+RUN cp .env .medusa/server/.env
+
+# Switch to medusa server directory
+WORKDIR /app/.medusa/server
+
+# Install server dependencies
+RUN yarn install --frozen-lockfile
+
+# Set production environment
+ENV NODE_ENV=production
 
 # Start the application
 CMD ["yarn", "start"] 
