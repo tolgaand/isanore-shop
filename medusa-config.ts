@@ -40,10 +40,17 @@ module.exports = defineConfig({
               region: process.env.S3_REGION,
               bucket: process.env.S3_BUCKET,
               endpoint: process.env.S3_ENDPOINT,
-              // other options...
             },
           },
         ],
+      },
+    },
+
+    /* --------- Regis Cache Config --------- */
+    {
+      resolve: "@medusajs/medusa/cache-redis",
+      options: {
+        redisUrl: process.env.CACHE_REDIS_URL,
       },
     },
   ],
