@@ -54,5 +54,10 @@ module.exports = defineConfig({
         redisUrl: process.env.CACHE_REDIS_URL,
       },
     },
+
+    /* --------- Collection Image Config --------- */
+    {
+      resolve: "./src/modules/collection-image",
+    },
   ],
 });
