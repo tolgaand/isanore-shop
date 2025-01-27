@@ -1,4 +1,5 @@
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
 
@@ -18,8 +19,7 @@ module.exports = defineConfig({
   },
   admin: {
     backendUrl: process.env.MEDUSA_BACKEND_URL,
-    vite: (config) => ({
-      ...config,
+    vite: () => ({
       server: {
         allowedHosts: process.env.MEDUSA_BACKEND_URL,
       },
@@ -53,11 +53,6 @@ module.exports = defineConfig({
       options: {
         redisUrl: process.env.CACHE_REDIS_URL,
       },
-    },
-
-    /* --------- Collection Image Config --------- */
-    {
-      resolve: "./src/modules/collection-image",
     },
   ],
 });
