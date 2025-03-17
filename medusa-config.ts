@@ -54,5 +54,9 @@ module.exports = defineConfig({
         redisUrl: process.env.CACHE_REDIS_URL,
       },
     },
+
+    {
+      resolve: "./src/modules/slider",
+    },
   ],
 });
