@@ -1,5 +1,4 @@
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
 
